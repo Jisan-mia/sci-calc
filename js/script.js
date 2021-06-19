@@ -356,12 +356,149 @@ function calculator(button) {
 	} else if (button.type == "calculate") {
 		let formulaStr = data.formula.join("");
 
-		let result = eval(formulaStr);
+		// solve power and factioral calculation
+
+		let powerSearchResult = search(data.formula, POWER);
+		let factorialSearchResult = search(data.formula, FACTORIAL);
+
+		// get power bases and replace with right formula
+		const bases = powerBaseGetter(data.formula, powerSearchResult);
+		bases.forEach((base) => {
+			let toReplace = base + POWER;
+			let replacement = "Math.pow(" + base + ",";
+
+			formulaStr = formulaStr.replace(toReplace, replacement);
+		});
+
+		// get factiorial number and replace with right formula
+		const numbers = factorialNumGetter(data.formula, factorialSearchResult);
+		numbers.forEach((factorial) => {
+			formulaStr = formulaStr.replace(
+				factorial.toReplace,
+				factorial.replacement
+			);
+		});
+
+		console.log(formulaStr);
+
+		let result;
+		try {
+			result = eval(formulaStr);
+		} catch (error) {
+			if (error instanceof SyntaxError) {
+				result = "Syntax Error!";
+				updateOutputResult(result);
+				return;
+			}
+		}
+
+		// save result for later use
+		ans = result;
+		data.operation = [result];
+		data.formula = [result];
 
 		updateOutputResult(result);
+		return;
 	}
 
 	updateOutputOperation(data.operation.join(""));
+}
+
+// search in an array
+function search(array, keyword) {
+	let searchResult = [];
+
+	array.forEach((item, index) => {
+		if (item == keyword) {
+			searchResult.push(index);
+		}
+	});
+
+	return searchResult;
+}
+
+// power base getter funciton
+function powerBaseGetter(formula, powerSearchResult) {
+	let powerBases = [];
+
+	powerSearchResult.forEach((powerIndex) => {
+		let base = []; //current base
+		let parenthesesCount = 0;
+		let previousIndex = powerIndex - 1;
+
+		while (previousIndex >= 0) {
+			if (formula[previousIndex] == "(") parenthesesCount--;
+			if (formula[previousIndex] == ")") parenthesesCount++;
+
+			let isOperator = false;
+			OPERATIONS.forEach((operator) => {
+				if (formula[previousIndex] == operator) isOperator = true;
+			});
+
+			let isPower = formula[previousIndex] == POWER;
+
+			if ((isOperator && parenthesesCount == 0) || isPower) break;
+
+			base.unshift(formula[previousIndex]);
+			previousIndex--;
+		}
+		powerBases.push(base.join(""));
+	});
+	return powerBases;
+}
+
+// factorial number gette function
+function factorialNumGetter(formula, factSearchResult) {
+	let factNumbers = [];
+	let factorialSequence = 0;
+
+	factSearchResult.forEach((factIndex) => {
+		let number = [];
+		let nextIndex = factIndex + 1;
+		let nextInput = formula[nextIndex];
+
+		if (nextInput == FACTORIAL) {
+			factorialSequence++;
+			return;
+		}
+
+		// if there was a fictorial sequence, we need to get the index of the very first factorial function
+		let firstFactorialIndex = factIndex - factorialSequence;
+		// to get the number right before it
+		let previousIndex = firstFactorialIndex - 1;
+		let parenthesesCount = 0;
+		while (previousIndex >= 0) {
+			if (formula[previousIndex] == "(") parenthesesCount--;
+			if (formula[previousIndex] == ")") parenthesesCount++;
+
+			let isOperator = false;
+			OPERATIONS.forEach((operator) => {
+				if (formula[previousIndex] == operator) isOperator = true;
+			});
+
+			if (isOperator && parenthesesCount == 0) break;
+
+			number.unshift(formula[previousIndex]);
+			previousIndex--;
+		}
+
+		let numberStr = number.join("");
+		const factorial = "factorial(";
+		const closeParenthesis = ")";
+		let times = factorialSequence + 1;
+
+		let toReplace = numberStr + FACTORIAL.repeat(times);
+		let replacement =
+			factorial.repeat(times) + numberStr + closeParenthesis.repeat(times);
+
+		factNumbers.push({
+			toReplace: toReplace,
+			replacement: replacement,
+		});
+		// reset factorialSequence
+		factorialSequence = 0;
+	});
+	return factNumbers;
 }
 
 // show operation on ui in realtime
@@ -373,6 +510,35 @@ function updateOutputResult(result) {
 	outputResultElement.innerHTML = result;
 }
 
+// trigonometric funciton
+function trigo(callback, angle) {
+	if (!RADIAN) {
+		angle = (angle * Math.PI) / 180;
+	}
+	return callback(angle);
+}
+
+// inversion trigonometric
+function inv_trigo(callback, value) {
+	let angle = callback(value);
+	if (!RADIAN) {
+		angle = (angle * 180) / Math.PI;
+	}
+	return angle;
+}
+
+// factorial funciton
+function factorial(number) {
+	if (number % 1 != 0) return gamma(number + 1);
+
+	if (number === 0 || number === 1) return 1;
+	let result = 1;
+	for (let i = number; i > 0; i--) {
+		result = result * i;
+		if (result === Infinity) return Infinity;
+	}
+	return result;
+}
 // gamma function
 function gamma(n) {
 	// accurate to about 15 decimal places
@@ -394,20 +560,4 @@ function gamma(n) {
 		var t = n + g + 0.5;
 		return Math.sqrt(2 * Math.PI) * Math.pow(t, n + 0.5) * Math.exp(-t) * x;
 	}
-}
-
-// trigonometric funciton
-function trigo(callback, angle) {
-	if (!RADIAN) {
-		angle = (angle * Math.PI) / 180;
-	}
-	return callback(angle);
-}
-
-function inv_trigo(callback, value) {
-	let angle = callback(value);
-	if (!RADIAN) {
-		angle = (angle * 180) / Math.PI;
-	}
-	return angle;
 }
