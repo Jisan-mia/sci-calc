@@ -285,7 +285,7 @@ function angleToggler() {
 	degBtn.classList.toggle("active-angle");
 }
 
-// calculator button event listener
+// calculator buttons event listener
 inputElement.addEventListener("click", (e) => {
 	const targetBtn = e.target;
 
@@ -358,12 +358,12 @@ function calculator(button) {
 		let formulaStr = data.formula.join("");
 
 		// solve power and factioral calculation
-
 		let powerSearchResult = search(data.formula, POWER);
 		let factorialSearchResult = search(data.formula, FACTORIAL);
 
 		// get power bases and replace with right formula
 		const bases = powerBaseGetter(data.formula, powerSearchResult);
+
 		bases.forEach((base) => {
 			let toReplace = base + POWER;
 			let replacement = "Math.pow(" + base + ",";
@@ -379,8 +379,6 @@ function calculator(button) {
 				factorial.replacement
 			);
 		});
-
-		console.log(formulaStr);
 
 		let result;
 		try {
@@ -454,7 +452,7 @@ function factorialNumGetter(formula, factSearchResult) {
 	let factorialSequence = 0;
 
 	factSearchResult.forEach((factIndex) => {
-		let number = [];
+		let number = []; // current number
 		let nextIndex = factIndex + 1;
 		let nextInput = formula[nextIndex];
 
@@ -463,7 +461,7 @@ function factorialNumGetter(formula, factSearchResult) {
 			return;
 		}
 
-		// if there was a fictorial sequence, we need to get the index of the very first factorial function
+		// if there was a factorial sequence, we need to get the index of the very first factorial function
 		let firstFactorialIndex = factIndex - factorialSequence;
 		// to get the number right before it
 		let previousIndex = firstFactorialIndex - 1;
