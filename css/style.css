@@ -156,7 +156,7 @@ body {
 }
 
 .active-angle {
-	background-color: #1d1d1d !important;
+	background-color: #1d1d1db2 !important;
 	color: #fff !important;
 	border-radius: 10px !important;
 }

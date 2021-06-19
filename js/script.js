@@ -273,6 +273,18 @@ function createButtons() {
 }
 createButtons();
 
+// radian or degree
+let RADIAN = true;
+const radBtn = document.getElementById("rad");
+const degBtn = document.getElementById("deg");
+
+radBtn.classList.add("active-angle");
+
+function angleToggler() {
+	radBtn.classList.toggle("active-angle");
+	degBtn.classList.toggle("active-angle");
+}
+
 // calculator button event listener
 inputElement.addEventListener("click", (e) => {
 	const targetBtn = e.target;
@@ -292,7 +304,9 @@ function calculator(button) {
 	} else if (button.type == "number") {
 		data.operation.push(button.symbol);
 		data.formula.push(button.formula);
-	} else if (button.type == "trigo_funciton") {
+	} else if (button.type == "trigo_function") {
+		data.operation.push(button.symbol + "(");
+		data.formula.push(button.formula);
 	} else if (button.type == "math_function") {
 		let symbol, formula;
 
@@ -308,6 +322,15 @@ function calculator(button) {
 
 			data.operation.push(symbol);
 			data.formula.push(formula);
+		} else if (button.name == "square") {
+			symbol = "^(";
+			formula = button.formula;
+
+			data.operation.push(symbol);
+			data.formula.push(formula);
+
+			data.operation.push(2);
+			data.formula.push(2);
 		} else {
 			symbol = button.symbol + "(";
 			formula = button.formula + "(";
@@ -323,6 +346,12 @@ function calculator(button) {
 			updateOutputResult(0);
 		} else if (button.name == "delete") {
 			data.operation.pop();
+		} else if (button.name == "rad") {
+			RADIAN = true;
+			angleToggler();
+		} else if (button.name == "deg") {
+			RADIAN = false;
+			angleToggler();
 		}
 	} else if (button.type == "calculate") {
 		let formulaStr = data.formula.join("");
@@ -365,4 +394,20 @@ function gamma(n) {
 		var t = n + g + 0.5;
 		return Math.sqrt(2 * Math.PI) * Math.pow(t, n + 0.5) * Math.exp(-t) * x;
 	}
+}
+
+// trigonometric funciton
+function trigo(callback, angle) {
+	if (!RADIAN) {
+		angle = (angle * Math.PI) / 180;
+	}
+	return callback(angle);
+}
+
+function inv_trigo(callback, value) {
+	let angle = callback(value);
+	if (!RADIAN) {
+		angle = (angle * 180) / Math.PI;
+	}
+	return angle;
 }
