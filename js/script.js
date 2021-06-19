@@ -346,6 +346,7 @@ function calculator(button) {
 			updateOutputResult(0);
 		} else if (button.name == "delete") {
 			data.operation.pop();
+			data.formula.pop();
 		} else if (button.name == "rad") {
 			RADIAN = true;
 			angleToggler();
