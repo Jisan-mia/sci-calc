@@ -402,7 +402,7 @@ function calculator(button) {
 
 	updateOutputOperation(data.operation.join(""));
 }
-
+// cube root ∛
 // search in an array
 function search(array, keyword) {
 	let searchResult = [];
